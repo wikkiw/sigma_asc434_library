@@ -2,7 +2,10 @@ from datetime import datetime
 import re
 import constants
 
+
 # HELPERS
+
+
 def matrix_IMG_HxIMG_W_to_bytes(matrix):
     """
     Convert a 16×128 binary matrix into 512 bytes.
