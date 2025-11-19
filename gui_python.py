@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox, filedialog
 from tkinter import scrolledtext
 import time
 import serial
+import serial.tools.list_ports
 
 import constants
 from comm_library import (
@@ -24,6 +25,10 @@ class SigmaPanelApp(tk.Tk):
         # --- connection settings ---
         self.port_var = tk.StringVar(value="COM4")   # change if needed
         self.baud_var = tk.StringVar(value="9600")
+
+        self.ports = [p.device for p in serial.tools.list_ports.comports()]
+        if self.ports:
+            self.port_var.set(self.ports[0])
 
         # --- token groups for text editor ---
         # All tokens supported by commands_set_text
