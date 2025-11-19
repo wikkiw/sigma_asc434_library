@@ -420,4 +420,3 @@ Set the correct **COM port**, then try:
 ## License
 
 No explicit license has been set yet.
-Add your preferred license here (e.g. MIT, BSD, GPL) if you plan to publish the project.
