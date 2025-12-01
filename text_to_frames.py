@@ -6,12 +6,56 @@ import constants
 
 # ========================= FONT HANDLING ================================
 
+def _center_matrix_horizontally(matrix, background_value=0):
+    """
+    Take a IMG_H x IMG_W matrix and horizontally center the non-background pixels.
+    Works for 0/1 or 0/255; anything != background_value is treated as 'lit'.
+    """
+    if not matrix:
+        return matrix
+
+    height = len(matrix)
+    width = len(matrix[0])
+
+    min_col = width
+    max_col = -1
+
+    # Find bounding box of all lit pixels
+    for row in matrix:
+        for x, val in enumerate(row):
+            if val != background_value:
+                if x < min_col:
+                    min_col = x
+                if x > max_col:
+                    max_col = x
+
+    # No lit pixels at all → nothing to center
+    if max_col == -1:
+        return matrix
+
+    content_width = max_col - min_col + 1
+
+    # Already full width → nothing to center
+    if content_width >= width:
+        return matrix
+
+    left_margin = (width - content_width) // 2
+
+    new_matrix = []
+    for row in matrix:
+        new_row = [background_value] * width
+        segment = row[min_col : max_col + 1]
+        new_row[left_margin : left_margin + content_width] = segment
+        new_matrix.append(new_row)
+
+    return new_matrix
+
 def load_led_font(size_label, font_path=None):
     """Loads Sans Serif font and maps size label → pixel size."""
     if size_label == "small":
         size = 8        # two-line capable
     elif size_label == "medium":
-        size = 12       # single line
+        size = 11       # single line
     elif size_label == "full":
         size = 15       # max height
     else:
@@ -75,9 +119,14 @@ def render_text_to_strip(text, font, color, multiline):
         bbox1 = dummy.textbbox((0, 0), line1, font=font)
         glyph_h1 = bbox1[3] - bbox1[1]
 
-        # bottom alignment for first (single) line
-        y_bottom_1 = constants.IMG_H - glyph_h1
-        base_y1 = y_bottom_1 - bbox1[1]
+        if multiline:
+            # first line goes into the top half (rows 0–7)
+            y_top_1 = 0
+            base_y1 = y_top_1 - bbox1[1]
+        else:
+            # single line → bottom-aligned in all 16px
+            y_bottom_1 = constants.IMG_H - glyph_h1
+            base_y1 = y_bottom_1 - bbox1[1]
 
         draw_mask.text((0 - bbox1[0], base_y1), line1, font=font, fill=1)
 
@@ -138,7 +187,14 @@ def image_to_led_matrices(img):
 
 # ========================= MAIN ENTRY =================================
 
-def generate_led_frames(text, size_label, color_name, font_path=None):
+def generate_led_frames(
+    text,
+    size_label="full",
+    color_name="red",
+    font_path=None,
+    invert=False,
+):
+
     """
     size_label = "small" / "medium" / "full"
     color_name = "red" / "green" / "yellow"
@@ -163,25 +219,44 @@ def generate_led_frames(text, size_label, color_name, font_path=None):
     for img in split_strip_into_frames(strip):
         frames.append(image_to_led_matrices(img))
 
+    # If the text fits into a single frame, center it horizontally
+    if len(frames) == 1:
+        red, green = frames[0]
+
+        # Center both color channels based on lit pixels
+        red_centered = _center_matrix_horizontally(red, background_value=0)
+        green_centered = _center_matrix_horizontally(green, background_value=0)
+
+        frames[0] = (red_centered, green_centered)
+
+    # frames is a list of (red_matrix, green_matrix),
+    # each matrix is IMG_H x IMG_W with 0/1 (or 0/255 etc.)
+    if invert:
+        inverted_frames = []
+        for red, green in frames:
+            inv_red = []
+            if color_name in ["red", "yellow"]:
+                for row in red:
+                    inv_row = []
+                    for px in row:
+                        bit = px & 1  # works for 0/1 or 0/255
+                        inv_row.append(0 if bit else 1)
+                    inv_red.append(inv_row)
+            else:
+                inv_red = red
+
+            inv_green = []
+            if color_name in ["green", "yellow"]:
+                for row in green:
+                    inv_row = []
+                    for px in row:
+                        bit = px & 1
+                        inv_row.append(0 if bit else 1)
+                    inv_green.append(inv_row)
+            else:
+                inv_green = green
+
+            inverted_frames.append((inv_red, inv_green))
+        frames = inverted_frames
+
     return frames
-
-
-def save_red_channel_bitmaps(frames, output_dir="led_bitmaps"):
-    """
-    Saves each frame's RED matrix as a 16×128 BMP image.
-    frames = list of (red_matrix, green_matrix)
-    """
-    os.makedirs(output_dir, exist_ok=True)
-
-    for idx, (red, _) in enumerate(frames):
-        img = Image.new("RGB", (constants.IMG_W, 16), (0, 0, 0))
-        px = img.load()
-
-        for y in range(constants.IMG_H):
-            for x in range(constants.IMG_W):
-                if red[y][x] == 1:
-                    px[x, y] = (255, 0, 0)   # red pixel
-                else:
-                    px[x, y] = (0, 0, 0)     # black
-
-        img.save(os.path.join(output_dir, f"frame_{idx:03d}.bmp"))

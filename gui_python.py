@@ -63,6 +63,24 @@ class SigmaPanelApp(tk.Tk):
                 "{action_holdb}",
                 "{action_interlock}",
                 "{action_shutter}",
+                "{action_roll_in}",
+                "{action_roll_int}",
+                "{action_roll_inb}",
+                "{action_roll_out}",
+                "{action_roll_outt}",
+                "{action_roll_outb}",
+                "{action_roll_left}",
+                "{action_roll_leftt}",
+                "{action_roll_leftb}",
+                "{action_roll_right}",
+                "{action_roll_rightt}",
+                "{action_roll_rightb}",
+                "{action_roll_up}",
+                "{action_roll_upt}",
+                "{action_roll_upb}",
+                "{action_roll_down}",
+                "{action_roll_downt}",
+                "{action_roll_downb}",
             ],
             "Wait": [
                 "{wait_0s}",
@@ -83,7 +101,7 @@ class SigmaPanelApp(tk.Tk):
         self._build_custom_frames_frame()
         self._build_log_frame()
 
-        self.after(100, lambda: self.log("Log inicializován, aplikace spuštěna.\n"))
+        self.after(100, lambda: self.log("Log initialized, application running.\n"))
 
     # ------------------------------------------------------------------ UI builders
     def _build_connection_frame(self):
@@ -91,7 +109,20 @@ class SigmaPanelApp(tk.Tk):
         frame.pack(fill="x", padx=10, pady=5)
 
         ttk.Label(frame, text="Serial port:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        ttk.Entry(frame, textvariable=self.port_var, width=12).grid(row=0, column=1, padx=5, pady=5)
+        self.port_combobox = ttk.Combobox(
+            frame,
+            textvariable=self.port_var,
+            values=self.ports,  # list from __init__
+            width=12,
+            state="readonly",  # user must pick from the list
+        )
+        self.port_combobox.grid(row=0, column=1, padx=5, pady=5)
+
+        ttk.Button(
+            frame,
+            text="Refresh",
+            command=self.refresh_ports,
+        ).grid(row=0, column=5, padx=5, pady=5, sticky="w")
 
         ttk.Label(frame, text="Baudrate:").grid(row=0, column=2, padx=5, pady=5, sticky="w")
         ttk.Entry(frame, textvariable=self.baud_var, width=8).grid(row=0, column=3, padx=5, pady=5)
@@ -120,7 +151,7 @@ class SigmaPanelApp(tk.Tk):
         )
         ttk.Button(
             frame,
-            text="Set width (and update IMG_W)",
+            text="Set width",
             command=self.on_set_width,
         ).grid(row=0, column=4, padx=5, pady=5, sticky="w")
 
@@ -142,7 +173,7 @@ class SigmaPanelApp(tk.Tk):
         )
         ttk.Label(frame, text=info, justify="left").pack(anchor="w", padx=5, pady=5)
 
-        # --- token buttons ---
+        # --- token selectors ---
         tokens_frame = ttk.LabelFrame(frame, text="Insert tokens into text")
         tokens_frame.pack(fill="x", padx=5, pady=5)
 
@@ -151,18 +182,38 @@ class SigmaPanelApp(tk.Tk):
             group_label = ttk.Label(tokens_frame, text=group_name + ":")
             group_label.grid(row=row, column=0, padx=5, pady=2, sticky="w")
 
-            col = 1
-            for token in tokens:
-                btn = ttk.Button(
+            if len(tokens) <= 1:
+                # keep original fast buttons for small groups
+                col = 1
+                for token in tokens:
+                    btn = ttk.Button(
+                        tokens_frame,
+                        text=token,
+                        command=lambda t=token: self.insert_token(t),
+                        width=max(10, len(token) // 2),
+                    )
+                    btn.grid(row=row, column=col, padx=2, pady=2, sticky="w")
+                    col += 1
+            else:
+                # use combobox for large groups – insert on selection
+                combo_var = tk.StringVar(value="---")
+                combo = ttk.Combobox(
                     tokens_frame,
-                    text=token,
-                    command=lambda t=token: self.insert_token(t),
-                    width=max(10, len(token) // 2),
+                    textvariable=combo_var,
+                    values=tokens,
+                    state="readonly",
+                    width=15,
                 )
-                btn.grid(row=row, column=col, padx=2, pady=2, sticky="w")
-                col += 1
+                combo.grid(row=row, column=1, padx=5, pady=2, sticky="w", columnspan=2)
+                combo.bind(
+                    "<<ComboboxSelected>>",
+                    lambda event, v=combo_var: self._on_token_from_combo(v),
+                )
 
             row += 1
+
+        # make combobox column stretch
+        tokens_frame.columnconfigure(1, weight=1)
 
         # --- text editor ---
         self.text_editor = scrolledtext.ScrolledText(frame, height=5, wrap="word")
@@ -194,7 +245,7 @@ class SigmaPanelApp(tk.Tk):
 
         # size
         ttk.Label(frame, text="Size:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
-        self.size_var = tk.StringVar(value="full")
+        self.size_var = tk.StringVar(value="medium")
         ttk.Combobox(
             frame,
             textvariable=self.size_var,
@@ -213,6 +264,14 @@ class SigmaPanelApp(tk.Tk):
             width=10,
             state="readonly",
         ).grid(row=1, column=3, padx=5, pady=5, sticky="w")
+
+        # inverted text toggle
+        self.invert_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            frame,
+            text="Invert text",
+            variable=self.invert_var,
+        ).grid(row=1, column=4, padx=5, pady=5, sticky="w")
 
         # font path (optional)
         ttk.Label(frame, text="Font file (optional, TTF/OTF):").grid(
@@ -339,6 +398,14 @@ class SigmaPanelApp(tk.Tk):
         self.text_editor.focus_set()
 
     # ------------------------------------------------------------------ callbacks
+    def _on_token_from_combo(self, var):
+        """Handle token insertion when a combobox selection is made."""
+        token = var.get()
+        if token:
+            self.insert_token(token)
+            # clear selection so choosing the same token again re-triggers easily
+            var.set("---")
+
     def on_set_time_date(self):
         try:
             commands = commands_set_time_and_date()
@@ -405,6 +472,7 @@ class SigmaPanelApp(tk.Tk):
 
         size_label = self.size_var.get()
         color_name = self.color_var.get()
+        invert = self.invert_var.get()
         font_path = self.font_path_var.get().strip() or None
 
         try:
@@ -413,6 +481,7 @@ class SigmaPanelApp(tk.Tk):
                 size_label=size_label,
                 color_name=color_name,
                 font_path=font_path,
+                invert=invert,
             )
         except Exception as e:
             messagebox.showerror("Error", f"Error generating frames:\n{e}")
@@ -431,6 +500,12 @@ class SigmaPanelApp(tk.Tk):
             return
 
         self.send_commands(commands)
+
+    def refresh_ports(self):
+        self.ports = [p.device for p in serial.tools.list_ports.comports()]
+        self.port_combobox["values"] = self.ports
+        if self.ports and self.port_var.get() not in self.ports:
+            self.port_var.set(self.ports[0])
 
 
 if __name__ == "__main__":

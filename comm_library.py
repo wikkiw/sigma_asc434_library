@@ -69,6 +69,25 @@ def commands_set_text(text: str) -> list:
         "{action_holdb}": constants.ACTION_HOLD_BOTTOM,
         "{action_interlock}": constants.ACTION_INTERLOCK,
         "{action_shutter}": constants.ACTION_SHUTTER,
+        "{action_roll_in}": constants.ACTION_ROLL_IN,
+        "{action_roll_int}": constants.ACTION_ROLL_IN_TOP,
+        "{action_roll_inb}": constants.ACTION_ROLL_IN_BOTTOM,
+        "{action_roll_out}": constants.ACTION_ROLL_OUT,
+        "{action_roll_outt}": constants.ACTION_ROLL_OUT_TOP,
+        "{action_roll_outb}": constants.ACTION_ROLL_OUT_BOTTOM,
+        "{action_roll_left}": constants.ACTION_ROLL_LEFT,
+        "{action_roll_leftt}": constants.ACTION_ROLL_LEFT_TOP,
+        "{action_roll_leftb}": constants.ACTION_ROLL_LEFT_BOTTOM,
+        "{action_roll_right}": constants.ACTION_ROLL_RIGHT,
+        "{action_roll_rightt}": constants.ACTION_ROLL_RIGHT_TOP,
+        "{action_roll_rightb}": constants.ACTION_ROLL_RIGHT_BOTTOM,
+        "{action_roll_up}": constants.ACTION_ROLL_UP,
+        "{action_roll_upt}": constants.ACTION_ROLL_UP_TOP,
+        "{action_roll_upb}": constants.ACTION_ROLL_UP_BOTTOM,
+        "{action_roll_down}": constants.ACTION_ROLL_DOWN,
+        "{action_roll_downt}": constants.ACTION_ROLL_DOWN_TOP,
+        "{action_roll_downb}": constants.ACTION_ROLL_DOWN_BOTTOM,
+
 
         # wait
         "{wait_0s}": constants.WAIT_0S,
@@ -135,7 +154,10 @@ def commands_show_custom_imgs(imgs):
     Return list of PACKETS (bytes) ready to send.
     Each packet is bytes: ASCII header + binary frame + ASCII footer.
     """
-    lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 67")
+    if len(imgs) == 1:
+        lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 62 5d 35")
+    else:
+        lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 67")
     iter_start = bytes.fromhex("5d 3f 50")
     lead_out = bytes.fromhex("5d 24 5d 24")
     footer = constants.CONFIRMATION
@@ -157,8 +179,7 @@ def commands_show_custom_imgs(imgs):
         header.extend(iter_start)
         header.append(iterator)   # raw character 'a', 'b', 'c'
         if i < len(imgs)-1:
-            #header.extend(b"])")
-            header.extend(bytes.fromhex("5d 29"))
+            header.extend(constants.WAIT_0S)
         iterator += 1
 
     header.extend(lead_out)
