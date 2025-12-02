@@ -88,6 +88,55 @@ def commands_set_text(text: str) -> list:
         "{action_roll_downt}": constants.ACTION_ROLL_DOWN_TOP,
         "{action_roll_downb}": constants.ACTION_ROLL_DOWN_BOTTOM,
 
+        "{action_rotate}": constants.ACTION_ROTATE,
+        "{action_rotatet}": constants.ACTION_ROTATE_TOP,
+        "{action_rotateb}": constants.ACTION_ROTATE_BOTTOM,
+        "{action_scroll}": constants.ACTION_SCROLL,
+        "{action_scrollt}": constants.ACTION_SCROLL_TOP,
+        "{action_scrollb}": constants.ACTION_SCROLL_BOTTOM,
+        "{action_slide}": constants.ACTION_SLIDE,
+        "{action_slidet}": constants.ACTION_SLIDE_TOP,
+        "{action_slideb}": constants.ACTION_SLIDE_BOTTOM,
+        "{action_snow}": constants.ACTION_SNOW,
+        "{action_snowt}": constants.ACTION_SNOW_TOP,
+        "{action_snowb}": constants.ACTION_SNOW_BOTTOM,
+        "{action_sparkle}": constants.ACTION_SPARKLE,
+        "{action_sparklet}": constants.ACTION_SPARKLE_TOP,
+        "{action_sparkleb}": constants.ACTION_SPARKLE_BOTTOM,
+        "{action_spray}": constants.ACTION_SPRAY,
+        "{action_sprayt}": constants.ACTION_SPRAY_TOP,
+        "{action_sprayb}": constants.ACTION_SPRAY_BOTTOM,
+        "{action_starburst}": constants.ACTION_STARBURST,
+        "{action_starburstt}": constants.ACTION_STARBURST_TOP,
+        "{action_starburstb}": constants.ACTION_STARBURST_BOTTOM,
+        "{action_switch}": constants.ACTION_SWITCH,
+        "{action_switcht}": constants.ACTION_SWITCH_TOP,
+        "{action_switchb}": constants.ACTION_SWITCH_BOTTOM,
+        "{action_twinkle}": constants.ACTION_TWINKLE,
+        "{action_twinklet}": constants.ACTION_TWINKLE_TOP,
+        "{action_twinkleb}": constants.ACTION_TWINKLE_BOTTOM,
+        "{action_wipe_left}": constants.ACTION_WIPE_LEFT,
+        "{action_wipe_leftt}": constants.ACTION_WIPE_LEFT_TOP,
+        "{action_wipe_leftb}": constants.ACTION_WIPE_LEFT_BOTTOM,
+        "{action_wipe_right}": constants.ACTION_WIPE_RIGHT,
+        "{action_wipe_rightt}": constants.ACTION_WIPE_RIGHT_TOP,
+        "{action_wipe_rightb}": constants.ACTION_WIPE_RIGHT_BOTTOM,
+        "{action_wipe_up}": constants.ACTION_WIPE_UP,
+        "{action_wipe_upt}": constants.ACTION_WIPE_UP_TOP,
+        "{action_wipe_upb}": constants.ACTION_WIPE_UP_BOTTOM,
+        "{action_wipe_down}": constants.ACTION_WIPE_DOWN,
+        "{action_wipe_downt}": constants.ACTION_WIPE_DOWN_TOP,
+        "{action_wipe_downb}": constants.ACTION_WIPE_DOWN_BOTTOM,
+        "{action_wipe_in}": constants.ACTION_WIPE_IN,
+        "{action_wipe_int}": constants.ACTION_WIPE_IN_TOP,
+        "{action_wipe_inb}": constants.ACTION_WIPE_IN_BOTTOM,
+        "{action_wipe_out}": constants.ACTION_WIPE_OUT,
+        "{action_wipe_outt}": constants.ACTION_WIPE_OUT_TOP,
+        "{action_wipe_outb}": constants.ACTION_WIPE_OUT_BOTTOM,
+        "{action_wipe_middle}": constants.ACTION_WIPE_MIDDLE,
+        "{action_wipe_middlet}": constants.ACTION_WIPE_MIDDLE_TOP,
+        "{action_wipe_middleb}": constants.ACTION_WIPE_MIDDLE_BOTTOM,
+
 
         # wait
         "{wait_0s}": constants.WAIT_0S,
@@ -155,7 +204,10 @@ def commands_show_custom_imgs(imgs):
     Each packet is bytes: ASCII header + binary frame + ASCII footer.
     """
     if len(imgs) == 1:
-        lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 62 5d 35")
+        if constants.IMG_W == 128:
+            lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 62 5d 35")
+        else:
+            lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 67 5d 29")
     else:
         lead_in = bytes.fromhex("5d 21 5a 30 30 5d 22 41 5a 5d 3b 20 67")
     iter_start = bytes.fromhex("5d 3f 50")
