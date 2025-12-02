@@ -35,7 +35,16 @@ class SigmaPanelApp(tk.Tk):
         self.token_groups = {
             "Time/Date": [
                 "{time}",
-                "{date}",
+                "{day_of_week}",
+                "{date_slash_mmddyy}",
+                "{date_slash_ddmmyy}",
+                "{date_dash_mmddyy}",
+                "{date_dash_ddmmyy}",
+                "{date_dot_mmddyy}",
+                "{date_dot_ddmmyy}",
+                "{date_space_mmddyy}",
+                "{date_space_ddmmyy}",
+                "{date_mmmm_ddyyyy}",
             ],
             "Colors": [
                 "{color_red}",
@@ -49,7 +58,11 @@ class SigmaPanelApp(tk.Tk):
             ],
             "Fonts": [
                 "{font_sserif7}",
+                "{font_sserif7_wide}",
+                "{font_sserif7_double}",
+                "{font_sserif7_dwide}",
                 "{font_serif7}",
+                "{font_serif7_double}",
                 "{font_serif12}",
                 "{font_serif16}",
             ],
@@ -250,7 +263,7 @@ class SigmaPanelApp(tk.Tk):
                     textvariable=combo_var,
                     values=tokens,
                     state="readonly",
-                    width=15,
+                    width=25,
                 )
                 combo.grid(row=row, column=1, padx=5, pady=2, sticky="w", columnspan=2)
                 combo.bind(

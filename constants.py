@@ -1,24 +1,25 @@
+# Dimensions
 IMG_W = 128
 IMG_H = 16
 
 # Communication
-
-# Write confirmation
-# .]!Z00]"E.  Z]$]$
 CONFIRMATION = bytes.fromhex("2e 5d 21 5a 30 30 5d 22 45 2e 20 20 5a 5d 24 5d 24")
 
-# Write start
-# ]!Z00]"
 WRITE_START = bytes.fromhex("5d 21 5a 30 30 5d 22")
-# ]$]$
 WRITE_END = bytes.fromhex("5d 24 5d 24")
-# AZ
 WRITE_TEXT = bytes.fromhex("41 5a")
 
-# ]3
 SHOW_TIME = bytes.fromhex("5d 33")
-# ]+3
-SHOW_DATE = bytes.fromhex("5d 2b 33")
+SHOW_DATE_SLASH_MMDDYY = bytes.fromhex("5d 2b 30")
+SHOW_DATE_SLASH_DDMMYY = bytes.fromhex("5d 2b 31")
+SHOW_DATE_DASH_MMDDYY = bytes.fromhex("5d 2b 32")
+SHOW_DATE_DASH_DDMMYY = bytes.fromhex("5d 2b 33")
+SHOW_DATE_DOT_MMDDYY = bytes.fromhex("5d 2b 34")
+SHOW_DATE_DOT_DDMMYY = bytes.fromhex("5d 2b 35")
+SHOW_DATE_SPACE_MMDDYY = bytes.fromhex("5d 2b 36")
+SHOW_DATE_SPACE_DDMMYY = bytes.fromhex("5d 2b 37")
+SHOW_DATE_MMMM_DDYYYY = bytes.fromhex("5d 2b 38")
+SHOW_DAY_OF_WEEK = bytes.fromhex("5d 2b 39")
 
 # Colors
 COLOR_RED = bytes.fromhex("5d 3c 31")
@@ -32,9 +33,13 @@ COLOR_MIX = bytes.fromhex("5d 3c 42")
 
 # Fonts
 FONT_SSERIF7 = bytes.fromhex("5d 3a 41")
+FONT_SSERIF7_WIDE = bytes.fromhex("5d 3a 42")
+FONT_SSERIF7_DOUBLE = bytes.fromhex("5d 3a 43")
+FONT_SSERIF7_DWIDE = bytes.fromhex("5d 3a 44")
 FONT_SERIF7 = bytes.fromhex("5d 3a 45")
-FONT_SERIF12 = bytes.fromhex("5d 3a 4c")
+FONT_SERIF7_DOUBLE = bytes.fromhex("5d 3a 46")
 FONT_SERIF16 = bytes.fromhex("5d 3a 47")
+FONT_SERIF12 = bytes.fromhex("5d 3a 4c")
 
 # Actions
 ACTION_NONE = bytes.fromhex("5d 3b 20 61")
@@ -64,7 +69,6 @@ ACTION_ROLL_IN_BOTTOM = bytes.fromhex("5d 3b 26 70")
 ACTION_ROLL_OUT = bytes.fromhex("5d 3b 20 71")
 ACTION_ROLL_OUT_TOP = bytes.fromhex("5d 3b 22 71")
 ACTION_ROLL_OUT_BOTTOM = bytes.fromhex("5d 3b 26 71")
-
 ACTION_ROTATE = bytes.fromhex("5d 3b 20 61")
 ACTION_ROTATE_TOP = bytes.fromhex("5d 3b 22 61")
 ACTION_ROTATE_BOTTOM = bytes.fromhex("5d 3b 26 61")

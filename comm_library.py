@@ -41,7 +41,16 @@ def commands_set_text(text: str) -> list:
     token_map = {
         # time/date
         "{time}": constants.SHOW_TIME,
-        "{date}": constants.SHOW_DATE,
+        "{day_of_week}": constants.SHOW_DAY_OF_WEEK,
+        "{date_slash_mmddyy}": constants.SHOW_DATE_SLASH_MMDDYY,
+        "{date_slash_ddmmyy}": constants.SHOW_DATE_SLASH_DDMMYY,
+        "{date_dash_mmddyy}": constants.SHOW_DATE_DASH_MMDDYY,
+        "{date_dash_ddmmyy}": constants.SHOW_DATE_DASH_DDMMYY,
+        "{date_dot_mmddyy}": constants.SHOW_DATE_DOT_MMDDYY ,
+        "{date_dot_ddmmyy}": constants.SHOW_DATE_DOT_DDMMYY,
+        "{date_space_mmddyy}": constants.SHOW_DATE_SPACE_MMDDYY,
+        "{date_space_ddmmyy}": constants.SHOW_DATE_SPACE_DDMMYY,
+        "{date_mmmm_ddyyyy}": constants.SHOW_DATE_MMMM_DDYYYY,
 
         # colors
         "{color_red}": constants.COLOR_RED,
@@ -58,6 +67,10 @@ def commands_set_text(text: str) -> list:
         "{font_serif7}": constants.FONT_SERIF7,
         "{font_serif12}": constants.FONT_SERIF12,
         "{font_serif16}": constants.FONT_SERIF16,
+        "{font_sserif7_wide}": constants.FONT_SSERIF7_WIDE,
+        "{font_sserif7_double}": constants.FONT_SSERIF7_DOUBLE,
+        "{font_sserif7_dwide}": constants.FONT_SSERIF7_DWIDE,
+        "{font_serif7_double}": constants.FONT_SERIF7_DOUBLE,
 
         # actions
         "{action_none}": constants.ACTION_NONE,
